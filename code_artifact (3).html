@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一元一次方程移項極速挑戰</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+            background-color: #f8fafc;
+        }
+        .pop-shadow {
+            box-shadow: 4px 4px 0px #334155;
+        }
+        .pop-shadow-sm {
+            box-shadow: 2px 2px 0px #334155;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-70px) scale(1.2); opacity: 0; }
+        }
+        .animate-float-fx {
+            animation: float-up 0.85s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes fire-pulse {
+            0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px #f97316); }
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 15px #ef4444); }
+        }
+        .animate-fire {
+            animation: fire-pulse 0.6s infinite ease-in-out;
+        }
+        /* Fraction Styling */
+        .math-frac {
+            display: inline-flex;
+            flex-direction: column;
+            vertical-align: middle;
+            text-align: center;
+            padding: 0 6px;
+            margin: 0 2px;
+        }
+        .math-num {
+            border-bottom: 2.5px solid currentColor !important;
+            padding-bottom: 3px;
+            margin-bottom: 2px;
+            line-height: 1.1;
+            display: block;
+        }
+        .math-den {
+            padding-top: 3px;
+            line-height: 1.1;
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col items-center justify-center p-2 sm:p-4 overflow-x-hidden">
+
+    <div id="app" class="w-full max-w-4xl bg-white border-4 border-slate-700 rounded-3xl pop-shadow overflow-hidden flex flex-col relative" style="min-height: 640px;">
+        
+        <!-- HEADER -->
+        <header class="bg-gradient-to-r from-amber-300 via-rose-300 to-sky-300 border-b-4 border-slate-700 p-3 sm:p-4 flex flex-wrap items-center justify-between gap-2 z-20">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl bg-white p-2 rounded-2xl border-2 border-slate-700 pop-shadow-sm">🏃‍♂️</span>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-black text-slate-800 tracking-wide">移項奔跑者</h1>
+                    <p class="text-xs sm:text-sm font-bold text-slate-700">中一數學：一元一次方程</p>
+                </div>
+            </div>
+            <div id="hud" class="hidden flex items-center space-x-2 sm:space-x-3 text-xs sm:text-sm font-black">
+                <div class="bg-white text-slate-800 px-3 py-1.5 rounded-xl border-2 border-slate-700 pop-shadow-sm">
+                    ⏱️ <span id="timer-display" class="text-rose-600 font-extrabold text-base">01:00</span>
+                </div>
+                <div class="bg-white text-slate-800 px-3 py-1.5 rounded-xl border-2 border-slate-700 pop-shadow-sm">
+                    ⭐ <span id="score-display" class="text-amber-500 font-extrabold text-base">0</span>
+                </div>
+                <div id="streak-box" class="bg-white text-slate-800 px-3 py-1.5 rounded-xl border-2 border-slate-700 pop-shadow-sm flex items-center gap-1">
+                    <span id="fire-icon" class="hidden">🔥</span> 🔥 <span id="streak-display" class="text-rose-500 font-extrabold text-base">0</span>
+                </div>
+                <!-- Top header navigation home button -->
+                <button type="button" id="btn-header-home" onclick="openExitModal()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-black px-3.5 py-2 rounded-xl border-2 border-slate-700 pop-shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer z-50">
+                    <span class="text-base">🏠</span><span class="font-bold">主選單</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTAINER -->
+        <main class="flex-1 relative flex flex-col items-center justify-center p-3 sm:p-4 bg-gradient-to-b from-slate-50 to-indigo-50/30">
+
+            <!-- MENU SCREEN -->
+            <div id="screen-menu" class="w-full flex flex-col items-center justify-center space-y-6 text-center py-6">
+                <div class="bg-white border-4 border-slate-700 p-8 rounded-3xl max-w-lg w-full pop-shadow">
+                    <div class="inline-block bg-rose-100 text-rose-800 text-xs sm:text-sm font-black px-3.5 py-1.5 rounded-full mb-3 border border-rose-300 animate-bounce">
+                        ⚡ 挑戰⚡
+                    </div>
+                    <h2 class="text-3xl font-black text-indigo-600 mb-3">歡迎來到移項跑道</h2>
+                    <p class="text-base font-bold text-slate-700 mb-6 leading-relaxed">
+                        切換跑道即可直接答題！<br>
+                        答對爽快加分，答速越快獲得越高金幣獎勵💥
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button onclick="showReview()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-black px-6 py-3.5 rounded-2xl border-b-4 border-slate-700 active:translate-y-1 transition-all pop-shadow-sm flex items-center justify-center space-x-2 text-base">
+                            <span>📖</span><span>核心溫習重點</span>
+                        </button>
+                        <button onclick="showLevelSelect()" class="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-black px-6 py-3.5 rounded-2xl border-b-4 border-slate-700 active:translate-y-1 transition-all pop-shadow-sm flex items-center justify-center space-x-2 text-base">
+                            <span>🚀</span><span>開始挑戰</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REVIEW SCREEN -->
+            <div id="screen-review" class="hidden w-full max-w-2xl bg-white border-4 border-slate-700 p-6 sm:p-8 rounded-3xl pop-shadow space-y-5 my-2">
+                <h2 class="text-2xl sm:text-3xl font-black text-indigo-600 border-b-4 border-indigo-100 pb-3 flex items-center gap-2">
+                    <span>💡</span> 移項法則 (Transposition Rules) 溫習
+                </h2>
+                <div class="space-y-4 text-base sm:text-lg text-slate-800 text-left">
+                    <div class="bg-amber-50 p-4 sm:p-5 rounded-2xl border-2 border-amber-300">
+                        <strong class="text-amber-900 text-lg sm:text-xl font-black block mb-1">1. 核心基礎題型溫習</strong>
+                        <div class="text-slate-700 font-bold leading-relaxed text-sm sm:text-base space-y-1 mt-2">
+                            <div>1. 常規加法：<span class="text-indigo-600 font-black">x + 1 = 2</span> ➔ x = 2 - 1 = 1</div>
+                            <div>2. 常規減法：<span class="text-indigo-600 font-black">x - 1 = 2</span> ➔ x = 2 + 1 = 3</div>
+                            <div>3. 正係數乘法：<span class="text-indigo-600 font-black">2a = 8</span> ➔ a = 8 ÷ 2 = 4</div>
+                            <div class="flex items-center gap-1.5">4. 正分母除法：<span class="text-indigo-600 font-black inline-flex items-center"><span class="math-frac"><span class="math-num">k</span><span class="math-den">3</span></span> = 5</span> ➔ k = 5 × 3 = 15</div>
+                            
+                            <div class="pt-2 border-t border-amber-200 text-rose-800 font-black">進階負數及變體題型：</div>
+                            <div>• <span class="text-rose-600 font-black">1 + x = 2</span> ➔ x = 2 - 1 = 1</div>
+                            <div>• <span class="text-rose-600 font-black">-1 + x = 2</span> ➔ x = 2 - (-1) = 3</div>
+                            <div>• <span class="text-rose-600 font-black">-2a = 8</span> ➔ a = 8 ÷ (-2) = -4</div>
+                            <div class="flex items-center gap-1.5">• <span class="text-rose-600 font-black inline-flex items-center"><span class="math-frac"><span class="math-num">k</span><span class="math-den">-3</span></span> = 5</span> ➔ k = 5 × (-3) = -15</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-sky-50 p-4 sm:p-5 rounded-2xl border-2 border-sky-300">
+                        <strong class="text-sky-900 text-lg sm:text-xl font-black block mb-2">2. 加減乘除移項規則</strong>
+                        <ul class="space-y-2 text-slate-800 font-bold">
+                            <li class="flex items-center gap-2">
+                                <span class="bg-sky-200 text-sky-900 px-2 py-0.5 rounded font-black text-sm">加變減 / 減變加</span>
+                                <span><i class="not-italic text-rose-600 font-black">+a</i> 移項變 <i class="not-italic text-sky-600 font-black">-a</i>；<i class="not-italic text-rose-600 font-black">-a</i> 移項變 <i class="not-italic text-sky-600 font-black">+a</i></span>
+                            </li>
+                            <li class="flex items-center gap-2 pt-1">
+                                <span class="bg-sky-200 text-sky-900 px-2 py-0.5 rounded font-black text-sm">乘變除 / 除變乘</span>
+                                <span><i class="not-italic text-rose-600 font-black">×a</i> 移項變 <i class="not-italic text-sky-600 font-black">÷a</i>；<i class="not-italic text-rose-600 font-black">÷a</i> 移項變 <i class="not-italic text-sky-600 font-black">×a</i></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-center pt-3">
+                    <button onclick="showMenu()" class="bg-slate-700 hover:bg-slate-600 text-white font-black px-8 py-3 rounded-2xl border-b-4 border-slate-900 active:translate-y-1 transition-all pop-shadow-sm flex items-center justify-center gap-2 mx-auto text-base">
+                        <span>🏠</span><span>返回主選單</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- LEVEL SELECT SCREEN -->
+            <div id="screen-level" class="hidden w-full max-w-3xl bg-white border-4 border-slate-700 p-6 sm:p-8 rounded-3xl pop-shadow text-center space-y-6">
+                <h2 class="text-2xl sm:text-3xl font-black text-indigo-600">
+                    選擇挑戰難度<br>
+                    <span class="text-rose-500 text-lg sm:text-xl font-bold">1分鐘挑戰</span>
+                </h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button onclick="startGame(1)" class="bg-sky-400 hover:bg-sky-300 text-slate-900 font-black p-4 rounded-2xl border-b-6 border-slate-700 active:translate-y-1 transition-all pop-shadow flex flex-col items-center justify-between space-y-2">
+                        <span class="text-3xl sm:text-4xl">🔀</span>
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs sm:text-sm">Level 1</span>
+                            <span class="text-base sm:text-lg font-black text-slate-900">新手村</span>
+                        </div>
+                        <span class="text-xs bg-white px-2 py-1 rounded-lg border border-slate-700 text-slate-800 font-extrabold w-full">只選移項符號<br>(+ - × ÷)</span>
+                    </button>
+                    <button onclick="startGame(2)" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-black p-4 rounded-2xl border-b-6 border-slate-700 active:translate-y-1 transition-all pop-shadow flex flex-col items-center justify-between space-y-2">
+                        <span class="text-3xl sm:text-4xl">⚡</span>
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs sm:text-sm">Level 2</span>
+                            <span class="text-base sm:text-lg font-black text-slate-900">破關者</span>
+                        </div>
+                        <span class="text-xs bg-white px-2 py-1 rounded-lg border border-slate-700 text-slate-800 font-extrabold w-full">一步移項計算<br>(x/a/k/y = ?)</span>
+                    </button>
+                    <button onclick="startGame(3)" class="bg-purple-400 hover:bg-purple-300 text-slate-900 font-black p-4 rounded-2xl border-b-6 border-slate-700 active:translate-y-1 transition-all pop-shadow flex flex-col items-center justify-between space-y-2">
+                        <span class="text-3xl sm:text-4xl">🎯</span>
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs sm:text-sm">Level 3</span>
+                            <span class="text-base sm:text-lg font-black text-slate-900">大師級</span>
+                        </div>
+                        <span class="text-xs bg-white px-2 py-1 rounded-lg border border-slate-700 text-slate-800 font-extrabold w-full">兩步移項<br>選【先移哪項】</span>
+                    </button>
+                    <button onclick="startGame(4)" class="bg-rose-400 hover:bg-rose-300 text-slate-900 font-black p-4 rounded-2xl border-b-6 border-slate-700 active:translate-y-1 transition-all pop-shadow flex flex-col items-center justify-between space-y-2">
+                        <span class="text-3xl sm:text-4xl">🔥</span>
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs sm:text-sm">Level 4</span>
+                            <span class="text-base sm:text-lg font-black text-slate-900">神級挑戰</span>
+                        </div>
+                        <span class="text-xs bg-white px-2 py-1 rounded-lg border border-slate-700 text-slate-800 font-extrabold w-full">兩步移項<br>完整終極計算</span>
+                    </button>
+                </div>
+                <div class="pt-2">
+                    <button onclick="showMenu()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-black px-6 py-2.5 rounded-xl border-2 border-slate-700 pop-shadow-sm active:translate-y-0.5 transition-all flex items-center justify-center gap-2 mx-auto text-base">
+                        <span>🏠</span><span>返回主選單</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- GAME PLAY SCREEN -->
+            <div id="screen-game" class="hidden w-full flex flex-col items-center relative">
+                <!-- Question Banner -->
+                <div id="question-banner" class="bg-white border-4 border-slate-700 px-6 py-3 rounded-2xl mb-2 text-center pop-shadow z-10 max-w-xl w-full flex flex-col items-center relative">
+                    <span id="level-badge" class="text-sm sm:text-base font-black text-white bg-indigo-600 px-4 py-1 rounded-full border-2 border-indigo-800 block mb-1 shadow-sm tracking-wide">
+                        👉 LEVEL 1：請選擇移項後【正確的符號】！
+                    </span>
+                    <div id="current-question-text" class="text-2xl sm:text-4xl font-black text-slate-800 tracking-wide flex items-center justify-center gap-1 my-1">
+                        x + 1 = 2
+                    </div>
+                </div>
+
+                <!-- Canvas Wrapper -->
+                <div class="relative w-full max-w-2xl bg-white border-4 border-slate-700 rounded-2xl overflow-hidden pop-shadow flex flex-col items-center">
+                    <canvas id="gameCanvas" width="600" height="350" class="w-full h-auto block bg-slate-50"></canvas>
+                    
+                    <!-- VFX Layer for Coins & Fire effects -->
+                    <div id="vfx-container" class="absolute inset-0 pointer-events-none overflow-hidden z-30 flex items-center justify-center"></div>
+
+                    <!-- 進度條 -->
+                    <div class="w-full bg-slate-800 p-2 border-t-4 border-slate-700 flex flex-col gap-1 z-20">
+                        <div class="flex justify-between items-center px-2 text-xs font-black text-white">
+                            <span class="flex items-center gap-1">🏃‍♂️ 賽道時間進程 (60秒)</span>
+                            <span id="progress-percent" class="text-amber-400">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-600 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-500 relative">
+                            <div id="progress-bar" class="bg-gradient-to-r from-amber-400 via-rose-400 to-sky-400 h-full rounded-full transition-all duration-300 w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Touch Controls Overlay -->
+                    <div class="absolute bottom-12 left-0 right-0 flex justify-between px-6 pointer-events-none">
+                        <button id="btn-left" class="pointer-events-auto bg-sky-400 hover:bg-sky-300 text-slate-900 font-black text-sm sm:text-base px-6 py-3 rounded-xl border-2 border-slate-700 active:scale-95 pop-shadow-sm">◀ 切換左跑道</button>
+                        <button id="btn-right" class="pointer-events-auto bg-purple-400 hover:bg-purple-300 text-slate-900 font-black text-sm sm:text-base px-6 py-3 rounded-xl border-2 border-slate-700 active:scale-95 pop-shadow-sm">切換右跑道 ▶</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FEEDBACK MODAL -->
+            <div id="modal-feedback" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div id="feedback-card" class="bg-white border-4 border-slate-700 p-6 rounded-3xl max-w-md w-full pop-shadow text-center space-y-4">
+                    <div id="feedback-icon" class="text-6xl">❌</div>
+                    <h3 id="feedback-title" class="text-2xl font-black text-rose-500">答錯了！</h3>
+                    <div id="feedback-content" class="text-sm font-bold text-slate-700 bg-slate-100 p-4 rounded-2xl border-2 border-slate-200 text-left leading-relaxed">
+                        <!-- Hint content -->
+                    </div>
+                    <button onclick="resumeGameAfterFeedback()" class="w-full bg-sky-400 hover:bg-sky-300 text-slate-900 font-black py-3 rounded-2xl border-b-4 border-slate-700 active:translate-y-1 transition-all pop-shadow-sm text-base">
+                        繼續挑戰 🏃‍♂️
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONFIRM EXIT TO MENU MODAL -->
+            <div id="modal-exit" class="hidden absolute inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <div class="bg-white border-4 border-slate-700 p-6 sm:p-8 rounded-3xl max-w-md w-full pop-shadow text-center space-y-5">
+                    <div class="text-5xl">🏠</div>
+                    <h3 class="text-2xl font-black text-slate-800">返回主選單？</h3>
+                    <p class="text-slate-600 font-bold text-sm sm:text-base">當前的遊戲進度與得分將不會保存，確定要離開嗎？</p>
+                    <div class="flex gap-3 justify-center pt-2">
+                        <button onclick="closeExitModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-black py-3 rounded-2xl border-b-4 border-slate-400 active:translate-y-0.5 transition-all text-base">
+                            繼續遊戲
+                        </button>
+                        <button onclick="confirmExitToMenu()" class="flex-1 bg-rose-500 hover:bg-rose-400 text-white font-black py-3 rounded-2xl border-b-4 border-rose-700 active:translate-y-0.5 transition-all text-base">
+                            確定離開
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GAME OVER SCREEN -->
+            <div id="screen-gameover" class="hidden w-full max-w-lg bg-white border-4 border-slate-700 p-8 rounded-3xl pop-shadow text-center space-y-5">
+                <div class="text-6xl">🏆</div>
+                <h2 class="text-3xl font-black text-indigo-600">1分鐘挑戰結算</h2>
+                <div class="bg-slate-50 p-4 rounded-2xl border-2 border-slate-200 space-y-2 text-base font-bold text-slate-700">
+                    <p>最終得分：<span id="final-score" class="text-emerald-500 font-black text-2xl">0</span></p>
+                    <p>最高連擊：<span id="final-streak" class="text-rose-500 font-black">0</span> 🔥</p>
+                    <p>答對題數：<span id="final-correct" class="text-sky-600 font-black">0</span> / <span id="final-total" class="font-black">0</span></p>
+                </div>
+                <div class="flex gap-4 justify-center pt-2">
+                    <button onclick="showLevelSelect()" class="bg-emerald-400 hover:bg-emerald-300 text-slate-900 font-black px-6 py-3 rounded-2xl border-b-4 border-slate-700 active:translate-y-1 transition-all pop-shadow-sm">
+                        再次挑戰
+                    </button>
+                    <button onclick="showMenu()" class="bg-slate-700 hover:bg-slate-600 text-white font-black px-6 py-3 rounded-2xl border-b-4 border-slate-900 active:translate-y-1 transition-all pop-shadow-sm flex items-center gap-1">
+                        <span>🏠</span><span>返回主選單</span>
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- Canvas Compatibility Fallback for roundRect ---
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (typeof r === 'number') r = [r, r, r, r];
+                const radius = r[0] || 0;
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.arcTo(x + w, y, x + w, y + h, radius);
+                this.arcTo(x + w, y + h, x, y + h, radius);
+                this.arcTo(x, y + h, x, y, radius);
+                this.arcTo(x, y, x + w, y, radius);
+                this.closePath();
+                return this;
+            };
+        }
+
+        // --- Game State Variables ---
+        let currentScreen = 'menu';
+        let currentLevel = 1;
+        let score = 0;
+        let streak = 0;
+        let maxStreak = 0;
+        let correctCount = 0;
+        let totalCount = 0;
+        let timeLeft = 60;
+        const totalDuration = 60;
+        let timerInterval = null;
+        let isPaused = false;
+        let isWaitingForAnswer = false;
+
+        // Canvas & Player runner variables
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let playerLane = 0; // 0: Left, 1: Right
+        const lanes = [190, 410]; // X coordinates
+
+        let currentQuestion = null;
+        let gateZ = 350; 
+        let gameSpeed = 3.5;
+        let animationFrameId = null;
+        let questionStartTime = 0;
+
+        let recentLanesHistory = [];
+        let runFrame = 0;
+
+        // --- Screen Switching Helpers ---
+        function switchScreen(screenId) {
+            ['menu', 'review', 'level', 'game', 'gameover'].forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`screen-${screenId}`);
+            if (target) target.classList.remove('hidden');
+            currentScreen = screenId;
+
+            if (screenId === 'game') {
+                document.getElementById('hud').classList.remove('hidden');
+            } else {
+                document.getElementById('hud').classList.add('hidden');
+            }
+        }
+
+        function showMenu() { 
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            isPaused = true;
+            document.getElementById('modal-feedback')?.classList.add('hidden');
+            document.getElementById('modal-exit')?.classList.add('hidden');
+            switchScreen('menu'); 
+        }
+        function showReview() { switchScreen('review'); }
+        function showLevelSelect() { switchScreen('level'); }
+
+        function openExitModal() {
+            isPaused = true;
+            document.getElementById('modal-exit')?.classList.remove('hidden');
+        }
+
+        function closeExitModal() {
+            document.getElementById('modal-exit')?.classList.add('hidden');
+            if (currentScreen === 'game') {
+                isPaused = false;
+            }
+        }
+
+        function confirmExitToMenu() {
+            document.getElementById('modal-exit')?.classList.add('hidden');
+            showMenu();
+        }
+
+        function updateHUD() {
+            const minutes = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const seconds = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${minutes}:${seconds}`;
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('streak-display').innerText = streak;
+
+            const streakBox = document.getElementById('streak-box');
+            if (streak >= 3) {
+                streakBox.classList.add('animate-fire', 'bg-amber-100', 'border-amber-400');
+            } else {
+                streakBox.classList.remove('animate-fire', 'bg-amber-100', 'border-amber-400');
+            }
+
+            const progress = Math.min(100, Math.max(0, Math.floor(((totalDuration - timeLeft) / totalDuration) * 100)));
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('progress-percent').innerText = `${progress}%`;
+        }
+
+        function generateQuestion(level) {
+            let qTextHtml = "";
+            let correctOption = "";
+            let wrongOption = "";
+            let explanation = "";
+
+            // Helper function to render visual fractions with clear fraction bar
+            const renderFrac = (num, den, highlightDen = false) => {
+                const denHtml = highlightDen 
+                    ? `<span class="bg-rose-500 text-white px-2 py-0.5 rounded border border-rose-700 font-black inline-block mt-0.5">${den}</span>`
+                    : den;
+                return `<span class="math-frac inline-inline-flex flex-col items-center align-middle mx-1.5"><span class="math-num border-b-2 border-current px-1.5 pb-1 leading-none">${num}</span><span class="math-den pt-1 leading-none">${denHtml}</span></span>`;
+            };
+
+            if (level === 1) {
+                // Guaranteed core 4 types weighted early
+                const rand = Math.random();
+                let subType;
+
+                if (totalCount < 4) {
+                    // First 4 questions strictlyCycle through the requested 4 core types
+                    subType = totalCount % 4; // 0: x+1=2, 1: x-1=2, 2: 2a=8, 3: k/3=5
+                } else if (rand < 0.6) {
+                    // 60% chance to repeat core 4 types
+                    subType = Math.floor(Math.random() * 4);
+                } else {
+                    // Other types (negative/front positive)
+                    subType = 4 + Math.floor(Math.random() * 4);
+                }
+                
+                if (subType === 0) { // 核心 1: 常規加法 x + 1 = 2
+                    const a = Math.floor(Math.random() * 15) + 1;
+                    const b = a + Math.floor(Math.random() * 15) + 1;
+                    qTextHtml = `x <span class="bg-rose-500 text-white px-2.5 py-0.5 rounded-lg border-2 border-rose-700 mx-1 font-black">+</span> ${a} = ${b}`;
+                    correctOption = "-"; wrongOption = "+";
+                    explanation = `【常規加法】：\n加號 <strong class="text-rose-600">+${a}</strong> 移項變減號 <strong class="text-sky-600">-</strong>：\n正解：x = ${b} - ${a}`;
+
+                } else if (subType === 1) { // 核心 2: 常規減法 x - 1 = 2
+                    const a = Math.floor(Math.random() * 15) + 1;
+                    const b = Math.floor(Math.random() * 15) + 1;
+                    qTextHtml = `x <span class="bg-rose-500 text-white px-2.5 py-0.5 rounded-lg border-2 border-rose-700 mx-1 font-black">-</span> ${a} = ${b}`;
+                    correctOption = "+"; wrongOption = "-";
+                    explanation = `【常規減法】：\n減號 <strong class="text-rose-600">-${a}</strong> 移項變加號 <strong class="text-sky-600">+</strong>：\n正解：x = ${b} + ${a}`;
+
+                } else if (subType === 2) { // 核心 3: 正係數乘法 2a = 8
+                    const a = Math.floor(Math.random() * 8) + 2;
+                    const b = a * (Math.floor(Math.random() * 10) + 1);
+                    qTextHtml = `<span class="bg-rose-500 text-white px-2.5 py-0.5 rounded-lg border-2 border-rose-700 mx-1 font-black">${a}</span>a = ${b}`;
+                    correctOption = "÷"; wrongOption = "×";
+                    explanation = `【正係數乘法】：\n乘以係數 <strong class="text-rose-600">${a}</strong>，跨過等號移項變成除以 <strong class="text-sky-600">÷</strong>：\n正解：a = ${b} ÷ ${a}`;
+
+                } else if (subType === 3) { // 核心 4: 正分母除法 k / 3 = 5
+                    const a = Math.floor(Math.random() * 7) + 2;
+                    const b = Math.floor(Math.random() * 10) + 1;
+                    qTextHtml = `${renderFrac('k', a, true)} = ${b}`;
+                    correctOption = "×"; wrongOption = "÷";
+                    explanation = `【正分母除法】：\n除以分母 <strong class="text-rose-600">${a}</strong>，跨過等號移項變成乘以 <strong class="text-sky-600">×</strong>：\n正解：k = ${b} × ${a}`;
+
+                } else if (subType === 4) { // a + x = b
+                    const a = Math.floor(Math.random() * 12) + 1;
+                    const b = a + Math.floor(Math.random() * 15) + 1;
+                    qTextHtml = `<span class="bg-rose-500 text-white px-2.5 py-0.5 rounded-lg border-2 border-rose-700 mx-1 font-black">${a}</span> + x = ${b}`;
+                    correctOption = "-"; wrongOption = "+";
+                    explanation = `前方數字 <strong class="text-rose-600">${a}</strong> 隱藏正號 (+${a})，移到右邊變減號 <strong class="text-sky-600">-</strong>：\n正解：x = ${b} - ${a}`;
+
+                } else if (subType === 5) { // -a + x = b
+                    const a = Math.floor(Math.random() * 12) + 1;
+                    const b = Math.floor(Math.random() * 15) + 1;
+                    qTextHtml = `<span class="bg-rose-500 text-white px-2.5 py-0.5 rounded-lg border-2 border-rose-700 mx-1 font-black">-${a}</span> + x = ${b}`;
+                    correctOption = "+"; wrongOption = "-";
+                    explanation = `前方數字是負數 <strong class="text-rose-600">-${a}</strong>，移項後變成加號 <strong class="text-sky-600">+</strong>：\n正解：x = ${b} + ${a}`;
+
+                } else if (subType === 6) { // Fraction: k / (-a) = b
+                    const a = Math.floor(Math.random() * 7) + 2;
+                    const b = Math.floor(Math.random() * 10) + 1;
+                    qTextHtml = `${renderFrac('k', `-${a}`, true)} = ${b}`;
+                    correctOption = "×"; wrongOption = "÷";
+                    explanation = `除以負分母 <strong class="text-rose-600">-${a}</strong>，跨過等號移項變成乘以 <strong class="text-sky-600">×</strong>：\n正解：k = ${b} × (-${a})`;
+
+                } else { // -2a = b
+                    const a = Math.floor(Math.random() * 7) + 2;
+                    const b = a * (Math.floor(Math.random() * 8) + 1);
+                    qTextHtml = `<span class="bg-rose-500 text-white px-2.5 py-0.5 rounded-lg border-2 border-rose-700 mx-1 font-black">-${a}</span>a = ${b}`;
+                    correctOption = "÷"; wrongOption = "×";
+                    explanation = `乘以負係數 <strong class="text-rose-600">-${a}</strong>，跨過等號移項變成除以 <strong class="text-sky-600">÷</strong>：\n正解：a = ${b} ÷ (-${a})`;
+                }
+
+            } else if (level === 2) {
+                // LEVEL 2: Direct Single-Step Equation Solving
+                let subType;
+
+                if (totalCount < 4) {
+                    subType = totalCount % 4; // Priority core 4
+                } else if (Math.random() < 0.6) {
+                    subType = Math.floor(Math.random() * 4);
+                } else {
+                    subType = 4 + Math.floor(Math.random() * 5);
+                }
+
+                if (subType === 0) { // 常規加法: x + 1 = 2
+                    const a = Math.floor(Math.random() * 8) + 1;
+                    const ans = Math.floor(Math.random() * 9) + 1;
+                    const b = ans + a;
+                    qTextHtml = `x + ${a} = ${b}`;
+                    correctOption = `x = ${ans}`;
+                    wrongOption = `x = ${b + a}`;
+                    explanation = `【常規加法】：\nx + ${a} = ${b} ➔ x = ${b} - ${a} = ${ans}`;
+
+                } else if (subType === 1) { // 常規減法: x - 1 = 2
+                    const a = Math.floor(Math.random() * 8) + 1;
+                    const b = Math.floor(Math.random() * 9) + 1;
+                    const ans = b + a;
+                    qTextHtml = `x - ${a} = ${b}`;
+                    correctOption = `x = ${ans}`;
+                    wrongOption = `x = ${b - a}`;
+                    explanation = `【常規減法】：\nx - ${a} = ${b} ➔ x = ${b} + ${a} = ${ans}`;
+
+                } else if (subType === 2) { // 正係數乘法: 2a = 8
+                    const coef = Math.floor(Math.random() * 5) + 2;
+                    const ans = Math.floor(Math.random() * 8) + 1;
+                    const b = coef * ans;
+                    qTextHtml = `${coef}a = ${b}`;
+                    correctOption = `a = ${ans}`;
+                    wrongOption = `a = ${b * coef}`;
+                    explanation = `【正係數乘法】：\n${coef}a = ${b} ➔ a = ${b} ÷ ${coef} = ${ans}`;
+
+                } else if (subType === 3) { // 正分母除法: k / 3 = 5
+                    const denom = Math.floor(Math.random() * 4) + 2;
+                    const b = Math.floor(Math.random() * 8) + 1;
+                    const ans = b * denom;
+                    qTextHtml = `${renderFrac('k', denom)} = ${b}`;
+                    correctOption = `k = ${ans}`;
+                    wrongOption = `k = ${b}`;
+                    explanation = `【正分母除法】：\n${renderFrac('k', denom)} = ${b} ➔ k = ${b} × ${denom} = ${ans}`;
+
+                } else if (subType === 4) { // 1 + x = 2
+                    const a = Math.floor(Math.random() * 8) + 1;
+                    const ans = Math.floor(Math.random() * 9) + 1;
+                    const b = a + ans;
+                    qTextHtml = `<span class="bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-black">${a}</span> + x = ${b}`;
+                    correctOption = `x = ${ans}`;
+                    wrongOption = `x = ${b + a}`;
+                    explanation = `正數在前：\n${a} 隱藏了 +${a}，移項：x = ${b} - ${a} = ${ans}`;
+
+                } else if (subType === 5) { // -1 + x = 2
+                    const a = Math.floor(Math.random() * 8) + 1;
+                    const b = Math.floor(Math.random() * 9) + 1;
+                    const ans = b + a;
+                    qTextHtml = `<span class="bg-rose-100 text-rose-900 px-2 py-0.5 rounded font-black">-${a}</span> + x = ${b}`;
+                    correctOption = `x = ${ans}`;
+                    wrongOption = `x = ${b - a}`;
+                    explanation = `負數在前：\n-${a} 移項到右邊變成 +${a}：\nx = ${b} - (-${a}) = ${b} + ${a} = ${ans}`;
+
+                } else if (subType === 6) { // -2a = 8
+                    const coef = Math.floor(Math.random() * 4) + 2;
+                    const ansVal = Math.floor(Math.random() * 6) + 1;
+                    const b = coef * ansVal;
+                    qTextHtml = `<span class="bg-rose-500 text-white px-2 py-0.5 rounded font-black">-${coef}</span>a = ${b}`;
+                    correctOption = `a = -${ansVal}`;
+                    wrongOption = `a = ${ansVal}`;
+                    explanation = `負係數：\n-${coef}a = ${b} ➔ a = ${b} ÷ (-${coef}) = -${ansVal}`;
+
+                } else if (subType === 7) { // k / (-3) = 5
+                    const denom = Math.floor(Math.random() * 4) + 2;
+                    const b = Math.floor(Math.random() * 6) + 1;
+                    const ansVal = b * denom;
+                    qTextHtml = `${renderFrac('k', `-${denom}`)} = ${b}`;
+                    correctOption = `k = -${ansVal}`;
+                    wrongOption = `k = ${ansVal}`;
+                    explanation = `負分母分數：\n${renderFrac('k', `-${denom}`)} = ${b} ➔ k = ${b} × (-${denom}) = -${ansVal}`;
+
+                } else { // -y = 1
+                    const b = Math.floor(Math.random() * 9) + 1;
+                    qTextHtml = `<span class="bg-rose-500 text-white px-2 py-0.5 rounded font-black">-y</span> = ${b}`;
+                    correctOption = `y = -${b}`;
+                    wrongOption = `y = ${b}`;
+                    explanation = `負號未知數：\n-y 即是 -1y，兩邊除以 -1：\ny = ${b} ÷ (-1) = -${b}`;
+                }
+
+            } else if (level === 3) {
+                // LEVEL 3: Select FIRST step transposition (Updated with P.9 & P.10 worksheet models)
+                const subType = Math.floor(Math.random() * 6);
+
+                if (subType === 0) { // P.9 (a)(b): ax + b = c  ->  先移 +b 變成 -b
+                    const a = Math.floor(Math.random() * 4) + 2;
+                    const b = Math.floor(Math.random() * 8) + 1;
+                    const c = Math.floor(Math.random() * 20) + 10;
+                    qTextHtml = `${a}x + ${b} = ${c}`;
+                    correctOption = `-${b}`;
+                    wrongOption = `÷${a}`;
+                    explanation = `【P.9 工作紙題型】兩步方程：先移不帶未知數的常數項！\n應先把 <strong class="text-rose-600">+${b}</strong> 移項變成 <strong class="text-sky-600">-${b}</strong>\n（即：${a}x = ${c} - ${b}）`;
+
+                } else if (subType === 1) { // P.9 (c)(d): (k / a) - b = c  ->  先移 -b 變成 +b
+                    const a = Math.floor(Math.random() * 3) + 2;
+                    const b = Math.floor(Math.random() * 6) + 1;
+                    const c = Math.floor(Math.random() * 15) + 5;
+                    qTextHtml = `${renderFrac('a', a)} - ${b} = ${c}`;
+                    correctOption = `+${b}`;
+                    wrongOption = `×${a}`;
+                    explanation = `【P.9 工作紙題型】兩步方程：先移獨立常數項！\n應先把 <strong class="text-rose-600">-${b}</strong> 移項變成 <strong class="text-sky-600">+${b}</strong>\n（即：${renderFrac('a', a)} = ${c} + ${b}）`;
+
+                } else if (subType === 2) { // P.10 (e)(f): 3x / 5 = 9 或 -2x / 3 = 8  ->  先移分母 5 變 ×5
+                    const a = Math.floor(Math.random() * 4) + 2;
+                    const b = Math.floor(Math.random() * 4) + 2;
+                    const c = Math.floor(Math.random() * 8) + 2;
+                    const isNeg = Math.random() < 0.5;
+                    const coefText = isNeg ? `-${a}` : `${a}`;
+                    qTextHtml = `${renderFrac(`${coefText}x`, b)} = ${c}`;
+                    correctOption = `×${b}`;
+                    wrongOption = `÷${b}`;
+                    explanation = `【P.10 (e)(f) 工作紙題型】分子帶係數分數方程：\n應先把分母 <strong class="text-rose-600">${b}</strong> 移項變成乘以 <strong class="text-sky-600">×${b}</strong>\n（即：${coefText}x = ${c} × ${b}）`;
+
+                } else if (subType === 3) { // P.10 (g)(h): (3 + x) / 5 = 2 或 (1 - x) / 4 = 2  ->  先移整體分母 5 變 ×5
+                    const a = Math.floor(Math.random() * 8) + 1;
+                    const b = Math.floor(Math.random() * 4) + 2;
+                    const c = Math.floor(Math.random() * 5) + 2;
+                    const isMinus = Math.random() < 0.5;
+                    const topExpr = isMinus ? `${a} - x` : `${a} + x`;
+                    qTextHtml = `${renderFrac(topExpr, b)} = ${c}`;
+                    correctOption = `×${b}`;
+                    wrongOption = `-${a}`;
+                    explanation = `【P.10 (g)(h) 工作紙題型】整體分數分子為多項式：\n整個分子被分母包裹，必須先將分母 <strong class="text-rose-600">${b}</strong> 移項變成 <strong class="text-sky-600">×${b}</strong>\n（即：${topExpr} = ${c} × ${b}）`;
+
+                } else if (subType === 4) { // a(x + b) = c  ->  先移括號外的 a 變成 ÷a
+                    const a = Math.floor(Math.random() * 3) + 2;
+                    const b = Math.floor(Math.random() * 5) + 1;
+                    const c = a * (Math.floor(Math.random() * 5) + 2);
+                    qTextHtml = `${a}(x + ${b}) = ${c}`;
+                    correctOption = `÷${a}`;
+                    wrongOption = `-${b}`;
+                    explanation = `【括號型方程】：整體被 ${a} 包裹着，必須先處理括號外的數！\n應先將乘以 <strong class="text-rose-600">${a}</strong> 移項變成除以 <strong class="text-sky-600">÷${a}</strong>\n（即：x + ${b} = ${c} ÷ ${a}）`;
+
+                } else { // -ax + b = c  ->  先移 +b 變成 -b
+                    const a = Math.floor(Math.random() * 4) + 2;
+                    const b = Math.floor(Math.random() * 8) + 1;
+                    const c = Math.floor(Math.random() * 15) + 1;
+                    qTextHtml = `-${a}x + ${b} = ${c}`;
+                    correctOption = `-${b}`;
+                    wrongOption = `÷(-${a})`;
+                    explanation = `【負係數兩步方程】：先移獨立常數項！\n應先把 <strong class="text-rose-600">+${b}</strong> 移項變成 <strong class="text-sky-600">-${b}</strong>\n（即：-${a}x = ${c} - ${b}）`;
+                }
+
+            } else {
+                // LEVEL 4: Two-Step Transposition Full Calculation (Updated with P.9 & P.10 worksheet models)
+                const subType = Math.floor(Math.random() * 6);
+
+                if (subType === 0) { // P.9 (a)(b): ax + b = c
+                    const a = Math.floor(Math.random() * 4) + 2;
+                    const ans = Math.floor(Math.random() * 8) + 1;
+                    const b = Math.floor(Math.random() * 10) + 1;
+                    const c = a * ans + b;
+                    qTextHtml = `${a}x + ${b} = ${c}`;
+                    correctOption = `x = ${ans}`;
+                    wrongOption = `x = ${ans + b}`;
+                    explanation = `【P.9 工作紙題型】\n第一步：${a}x = ${c} - ${b} = ${a * ans}\n第二步：x = ${a * ans} ÷ ${a} = ${ans}`;
+
+                } else if (subType === 1) { // P.9 (c)(d): (a / b) - c = d
+                    const b = Math.floor(Math.random() * 3) + 2;
+                    const ansVal = Math.floor(Math.random() * 5) + 1;
+                    const c = Math.floor(Math.random() * 6) + 1;
+                    const d = ansVal - c;
+                    qTextHtml = `${renderFrac('a', b)} - ${c} = ${d}`;
+                    correctOption = `a = ${ansVal * b}`;
+                    wrongOption = `a = ${ansVal}`;
+                    explanation = `【P.9 工作紙題型】\n第一步：${renderFrac('a', b)} = ${d} + ${c} = ${ansVal}\n第二步：a = ${ansVal} × ${b} = ${ansVal * b}`;
+
+                } else if (subType === 2) { // P.10 (e)(f): 3x / 5 = 9 或 -2x / 3 = 8
+                    const b = Math.floor(Math.random() * 3) + 2; //分母
+                    const ans = Math.floor(Math.random() * 5) + 1; 
+                    const a = Math.floor(Math.random() * 3) + 2; //係數
+                    const isNeg = Math.random() < 0.5;
+                    const multRes = a * ans;
+                    const rhs = multRes / b; 
+                    
+                    // Generate clean numbers: (a * ans) is divisible by b
+                    const cleanAns = Math.floor(Math.random() * 6) + 1;
+                    const cleanB = Math.floor(Math.random() * 3) + 2;
+                    const cleanA = Math.floor(Math.random() * 3) + 2;
+                    const cleanRhs = cleanA * cleanAns; 
+                    // Equation: (cleanA * x) / cleanB = cleanRhs  => cleanA * x = cleanRhs * cleanB
+                    
+                    if (isNeg) {
+                        qTextHtml = `${renderFrac(`-${cleanA}x`, cleanB)} = ${cleanRhs}`;
+                        const finalAns = -(cleanRhs * cleanB / cleanA);
+                        correctOption = `x = ${finalAns}`;
+                        wrongOption = `x = ${-finalAns}`;
+                        explanation = `【P.10 (f) 工作紙負係數題型】\n第一步：-${cleanA}x = ${cleanRhs} × ${cleanB} = ${cleanRhs * cleanB}\n第二步：x = (${cleanRhs * cleanB}) ÷ (-${cleanA}) = ${finalAns}`;
+                    } else {
+                        qTextHtml = `${renderFrac(`${cleanA}x`, cleanB)} = ${cleanRhs}`;
+                        const finalAns = (cleanRhs * cleanB / cleanA);
+                        correctOption = `x = ${finalAns}`;
+                        wrongOption = `x = ${finalAns * cleanB}`;
+                        explanation = `【P.10 (e) 工作紙正係數題型】\n第一步：${cleanA}x = ${cleanRhs} × ${cleanB} = ${cleanRhs * cleanB}\n第二步：x = (${cleanRhs * cleanB}) ÷ ${cleanA} = ${finalAns}`;
+                    }
+
+                } else if (subType === 3) { // P.10 (g)(h): (1 - x) / 4 = 2 或 (3 + x) / 5 = 2
+                    const b = Math.floor(Math.random() * 3) + 2; // 分母
+                    const rhs = Math.floor(Math.random() * 4) + 2; // 右邊
+                    const product = rhs * b; 
+                    const isMinus = Math.random() < 0.5;
+
+                    if (isMinus) { // (a - x) / b = rhs
+                        const a = Math.floor(Math.random() * 5) + 1;
+                        // a - x = product => -x = product - a => x = -(product - a)
+                        const finalAns = -(product - a);
+                        qTextHtml = `${renderFrac(`${a} - x`, b)} = ${rhs}`;
+                        correctOption = `x = ${finalAns}`;
+                        wrongOption = `x = ${product - a}`;
+                        explanation = `【P.10 (h) 工作紙含負號分子題型】\n第一步：${a} - x = ${rhs} × ${b} = ${product}\n第二步：-x = ${product} - ${a} = ${product - a}\n第三步：x = ${finalAns}`;
+                    } else { // (a + x) / b = rhs
+                        const a = Math.floor(Math.random() * 8) + 1;
+                        const finalAns = product - a;
+                        qTextHtml = `${renderFrac(`${a} + x`, b)} = ${rhs}`;
+                        correctOption = `x = ${finalAns}`;
+                        wrongOption = `x = ${product + a}`;
+                        explanation = `【P.10 (g) 工作紙題型】\n第一步：${a} + x = ${rhs} × ${b} = ${product}\n第二步：x = ${product} - ${a} = ${finalAns}`;
+                    }
+
+                } else if (subType === 4) { // a(x + b) = c
+                    const a = Math.floor(Math.random() * 3) + 2;
+                    const b = Math.floor(Math.random() * 5) + 1;
+                    const ans = Math.floor(Math.random() * 6) + 1;
+                    const c = a * (ans + b);
+                    qTextHtml = `${a}(x + ${b}) = ${c}`;
+                    correctOption = `x = ${ans}`;
+                    wrongOption = `x = ${ans + b}`;
+                    explanation = `【括號題型】\n第一步：x + ${b} = ${c} ÷ ${a} = ${ans + b}\n第二步：x = ${ans + b} - ${b} = ${ans}`;
+
+                } else { // -ax + b = c
+                    const a = Math.floor(Math.random() * 3) + 2;
+                    const ans = Math.floor(Math.random() * 6) + 1;
+                    const b = Math.floor(Math.random() * 8) + 10;
+                    const c = b - a * ans;
+                    qTextHtml = `- ${a}x + ${b} = ${c}`;
+                    correctOption = `x = ${ans}`;
+                    wrongOption = `x = -${ans}`;
+                    explanation = `【負係數題型】\n第一步：-${a}x = ${c} - ${b} = -${a * ans}\n第二步：x = (-${a * ans}) ÷ (-${a}) = ${ans}`;
+                }
+            }
+
+            // Unpredictable non-pattern answer placement
+            let correctLane = Math.random() < 0.5 ? 0 : 1;
+            
+            if (recentLanesHistory.length >= 2) {
+                const last = recentLanesHistory[recentLanesHistory.length - 1];
+                const prev = recentLanesHistory[recentLanesHistory.length - 2];
+                if (last === prev) {
+                    correctLane = Math.random() < 0.75 ? 1 - last : last;
+                }
+            }
+
+            recentLanesHistory.push(correctLane);
+            if (recentLanesHistory.length > 5) recentLanesHistory.shift();
+
+            let options = [];
+            if (correctLane === 0) {
+                options = [correctOption, wrongOption];
+            } else {
+                options = [wrongOption, correctOption];
+            }
+
+            return {
+                textHtml: qTextHtml,
+                options: options,
+                correctLane: correctLane,
+                explanation: explanation
+            };
+        }
+
+        function startGame(level) {
+            currentLevel = level;
+            score = 0;
+            streak = 0;
+            maxStreak = 0;
+            correctCount = 0;
+            totalCount = 0;
+            timeLeft = 60;
+            isPaused = false;
+            isWaitingForAnswer = false;
+            recentLanesHistory = [];
+
+            const levelBadge = document.getElementById('level-badge');
+            if (level === 1) {
+                levelBadge.innerText = '👉 🔀 Level 1 (新手村)：請選擇移項後【正確的符號】！ (+ - × ÷)';
+                levelBadge.className = 'text-sm sm:text-base font-black text-white bg-indigo-600 px-4 py-1.5 rounded-full border-2 border-indigo-800 block mb-1 shadow-sm tracking-wide';
+            } else if (level === 2) {
+                levelBadge.innerText = '👉 ⚡ Level 2 (破關者)：一步移項！計算出未知數值！';
+                levelBadge.className = 'text-sm sm:text-base font-black text-white bg-amber-500 px-4 py-1.5 rounded-full border-2 border-amber-700 block mb-1 shadow-sm tracking-wide';
+            } else if (level === 3) {
+                levelBadge.innerText = '👉 🎯 Level 3 (大師級)：兩步移項——請選擇【先移哪一個項】！';
+                levelBadge.className = 'text-sm sm:text-base font-black text-white bg-purple-600 px-4 py-1.5 rounded-full border-2 border-purple-800 block mb-1 shadow-sm tracking-wide';
+            } else {
+                levelBadge.innerText = '👉 🔥 Level 4 (神級挑戰)：【兩步移項】計算出最終未知數值！';
+                levelBadge.className = 'text-sm sm:text-base font-black text-white bg-rose-600 px-4 py-1.5 rounded-full border-2 border-rose-800 block mb-1 shadow-sm tracking-wide';
+            }
+
+            updateHUD();
+            switchScreen('game');
+            spawnNewQuestion();
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (!isPaused && currentScreen === 'game') {
+                    timeLeft--;
+                    updateHUD();
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        endGame();
+                    }
+                }
+            }, 1000);
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            gameLoop();
+        }
+
+        function spawnNewQuestion() {
+            currentQuestion = generateQuestion(currentLevel);
+            document.getElementById('current-question-text').innerHTML = currentQuestion.textHtml;
+            gateZ = 350;
+            isWaitingForAnswer = false;
+            questionStartTime = Date.now();
+        }
+
+        function handleAnswerSelection(selectedLane) {
+            if (isPaused || currentScreen !== 'game') return;
+
+            playerLane = selectedLane;
+            totalCount++;
+
+            const answerTimeSec = (Date.now() - questionStartTime) / 1000;
+
+            if (playerLane === currentQuestion.correctLane) {
+                correctCount++;
+                streak++;
+                if (streak > maxStreak) maxStreak = streak;
+                
+                const speedBonus = Math.max(10, Math.floor((3.5 - Math.min(3.0, answerTimeSec)) * 30));
+                const pts = 100 + (streak - 1) * 20 + speedBonus;
+                score += pts;
+                updateHUD();
+
+                triggerSuccessVFX(pts, speedBonus > 30);
+                spawnNewQuestion();
+            } else {
+                streak = 0;
+                score = Math.max(0, score - 30);
+                updateHUD();
+                triggerFeedback();
+            }
+        }
+
+        function triggerSuccessVFX(pts, isSuperFast) {
+            const vfxContainer = document.getElementById('vfx-container');
+            const fxEl = document.createElement('div');
+            fxEl.className = 'animate-float-fx font-black text-amber-950 bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 border-4 border-amber-600 px-6 py-3 rounded-2xl text-2xl sm:text-4xl flex items-center gap-2 shadow-2xl z-40 transform scale-110';
+            
+            const badgeHtml = streak >= 3 
+                ? '<span class="text-amber-700 text-lg sm:text-2xl font-black italic tracking-wide animate-pulse">PERFECT!</span>' 
+                : '✨';
+
+            fxEl.innerHTML = `<span class="text-4xl sm:text-5xl animate-bounce">🪙</span> <span class="text-amber-950 font-black tracking-wider">+${pts}</span> ${isSuperFast ? '<span class="text-xs bg-amber-200 text-amber-900 px-2 py-1 rounded-md border border-amber-500">⚡極速</span>' : ''} ${badgeHtml}`;
+            
+            vfxContainer.appendChild(fxEl);
+            setTimeout(() => {
+                if (vfxContainer.contains(fxEl)) {
+                    vfxContainer.removeChild(fxEl);
+                }
+            }, 850);
+        }
+
+        function gameLoop() {
+            if (currentScreen !== 'game') return;
+
+            if (!isPaused && !isWaitingForAnswer) {
+                gateZ -= gameSpeed;
+                runFrame += 0.2;
+
+                if (gateZ <= 210) {
+                    gateZ = 210;
+                    isWaitingForAnswer = true;
+                }
+            }
+
+            renderCanvas();
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function renderCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            grad.addColorStop(0, '#f1f5f9');
+            grad.addColorStop(0.6, '#e2e8f0');
+            grad.addColorStop(1, '#cbd5e1');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const horizonY = 90;
+            const bottomY = canvas.height;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2 - 50, horizonY);
+            ctx.lineTo(canvas.width / 2 + 50, horizonY);
+            ctx.lineTo(canvas.width + 120, bottomY);
+            ctx.lineTo(-120, bottomY);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2 - 50, horizonY);
+            ctx.lineTo(-120, bottomY);
+            ctx.moveTo(canvas.width / 2 + 50, horizonY);
+            ctx.lineTo(canvas.width + 120, bottomY);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([12, 12]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, horizonY);
+            ctx.lineTo(canvas.width / 2, bottomY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            if (currentQuestion) {
+                const scale = Math.max(0.4, (380 - gateZ) / 240);
+                const baseWidth = (currentLevel === 1 ? 150 : 200) * scale;
+                const baseHeight = (currentLevel === 1 ? 85 : 70) * scale;
+                let renderY = horizonY + (bottomY - horizonY) * (1 - gateZ / 350) - 25;
+
+                const gateColors = [
+                    { fill: '#e0f2fe', border: '#0284c7', text: '#0369a1' },
+                    { fill: '#f3e8ff', border: '#9333ea', text: '#7e22ce' }
+                ];
+
+                for (let i = 0; i < 2; i++) {
+                    let laneCenterX = lanes[i];
+                    let renderX = canvas.width / 2 + (laneCenterX - canvas.width / 2) * scale;
+
+                    ctx.fillStyle = gateColors[i].fill;
+                    ctx.strokeStyle = (i === playerLane && isWaitingForAnswer) ? '#0284c7' : gateColors[i].border;
+                    ctx.lineWidth = (i === playerLane && isWaitingForAnswer) ? 5 : 3;
+
+                    ctx.beginPath();
+                    ctx.roundRect(renderX - baseWidth / 2, renderY - baseHeight / 2, baseWidth, baseHeight, 16 * scale);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = gateColors[i].text;
+                    const fontSize = currentLevel === 1 ? Math.floor(58 * scale) : Math.floor(28 * scale);
+                    ctx.font = `900 ${Math.max(26, fontSize)}px 'Noto Sans TC', sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(currentQuestion.options[i], renderX, renderY);
+                }
+            }
+
+            const playerX = lanes[playerLane];
+            const playerY = bottomY - 60;
+
+            ctx.fillStyle = 'rgba(51, 65, 85, 0.3)';
+            ctx.beginPath();
+            ctx.ellipse(playerX, playerY + 35, 26, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            const legAngle = Math.sin(runFrame * 3) * 15;
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(playerX - 6, playerY + 10);
+            ctx.lineTo(playerX - 10 + legAngle, playerY + 32);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(playerX + 6, playerY + 10);
+            ctx.lineTo(playerX + 10 - legAngle, playerY + 32);
+            ctx.stroke();
+
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.roundRect(playerX - 14, playerY - 12, 28, 26, 8);
+            ctx.fill();
+
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(playerX, playerY - 24, 13, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#2563eb';
+            ctx.beginPath();
+            ctx.arc(playerX, playerY - 28, 13, Math.PI, 0);
+            ctx.fill();
+        }
+
+        function triggerFeedback() {
+            isPaused = true;
+
+            const modal = document.getElementById('modal-feedback');
+            const icon = document.getElementById('feedback-icon');
+            const title = document.getElementById('feedback-title');
+            const content = document.getElementById('feedback-content');
+
+            icon.innerText = '❌';
+            title.innerText = '答錯了！解析提示：';
+            title.className = 'text-2xl font-black text-rose-500';
+
+            content.innerHTML = `
+                <p class="mb-2"><strong>你的選擇：</strong> ${currentQuestion.options[playerLane]}</p>
+                <p class="mb-2 text-indigo-600"><strong>正確答案：</strong> ${currentQuestion.options[currentQuestion.correctLane]}</p>
+                <div class="border-t-2 border-slate-200 pt-2 mt-2 text-xs text-slate-600 whitespace-pre-line">
+                    ${currentQuestion.explanation}
+                </div>
+            `;
+            modal.classList.remove('hidden');
+        }
+
+        function resumeGameAfterFeedback() {
+            document.getElementById('modal-feedback').classList.add('hidden');
+            spawnNewQuestion();
+            isPaused = false;
+        }
+
+        function endGame() {
+            isPaused = true;
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+
+            document.getElementById('hud').classList.add('hidden');
+            ['menu', 'review', 'level', 'game', 'modal-feedback', 'modal-exit'].forEach(s => {
+                const el = document.getElementById(`screen-${s}`) || document.getElementById(s);
+                if (el) el.classList.add('hidden');
+            });
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-streak').innerText = maxStreak;
+            document.getElementById('final-correct').innerText = correctCount;
+            document.getElementById('final-total').innerText = totalCount;
+
+            currentScreen = 'gameover';
+            const gameOverEl = document.getElementById('screen-gameover');
+            if (gameOverEl) {
+                gameOverEl.classList.remove('hidden');
+            }
+        }
+
+        // Keyboard navigation
+        window.addEventListener('keydown', (e) => {
+            if (currentScreen !== 'game' || isPaused) return;
+
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') {
+                if (isWaitingForAnswer) {
+                    handleAnswerSelection(0);
+                } else {
+                    playerLane = 0;
+                }
+            } else if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') {
+                if (isWaitingForAnswer) {
+                    handleAnswerSelection(1);
+                } else {
+                    playerLane = 1;
+                }
+            }
+        });
+
+        // Touch Control Buttons
+        document.getElementById('btn-left').addEventListener('click', () => {
+            if (currentScreen !== 'game' || isPaused) return;
+            if (isWaitingForAnswer) {
+                handleAnswerSelection(0);
+            } else {
+                playerLane = 0;
+            }
+        });
+        document.getElementById('btn-right').addEventListener('click', () => {
+            if (currentScreen !== 'game' || isPaused) return;
+            if (isWaitingForAnswer) {
+                handleAnswerSelection(1);
+            } else {
+                playerLane = 1;
+            }
+        });
+
+        // Canvas Touch Swipe Support
+        let touchStartX = 0;
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length > 0) {
+                touchStartX = e.touches[0].clientX;
+            }
+        }, {passive: true});
+
+        canvas.addEventListener('touchend', (e) => {
+            if (currentScreen !== 'game' || isPaused) return;
+            if (e.changedTouches && e.changedTouches.length > 0) {
+                let touchEndX = e.changedTouches[0].clientX;
+                let diff = touchEndX - touchStartX;
+                if (Math.abs(diff) > 20) {
+                    const chosenLane = diff > 0 ? 1 : 0;
+                    if (isWaitingForAnswer) {
+                        handleAnswerSelection(chosenLane);
+                    } else {
+                        playerLane = chosenLane;
+                    }
+                }
+            }
+        }, {passive: true});
+    </script>
+</body>
+</html>
